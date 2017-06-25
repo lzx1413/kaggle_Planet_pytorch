@@ -39,7 +39,7 @@ def default_loader(path):
 class PlanetDataset(data.Dataset):
     """Face Landmarks dataset."""
 
-    def __init__(self, csv_file, root_dir,image_type='jpg',transform=None,loader = default_loader):
+    def __init__(self, csv_file, root_dir,image_type='jpg',transform=None,test = False,loader = default_loader):
         """
         Args:
             csv_file (string): Path to the csv file with annotations.
@@ -53,20 +53,22 @@ class PlanetDataset(data.Dataset):
         self.image_type = image_type
         self.transform = transform
         self.loader = loader
-
+        self.test = test
+        self.num = len(self.label_file)
     def __len__(self):
         return len(self.label_file)
 
     def __getitem__(self,idx):
         img_name = os.path.join(self.root_dir, self.label_file.ix[idx, 0]+'.'+self.image_type)
         image = self.loader(img_name)
-        labels = self.label_file.ix[idx, 1:].as_matrix().astype('float32')
         #landmarks = landmarks.reshape(-1, 2)
         #sample = {'image': image, 'lables': lables}
 
         if self.transform:
             image = self.transform(image)
-
+        if self.test:
+            return image
+        labels = self.label_file.ix[idx, 1:].as_matrix().astype('float32')
         return image,labels
 
 if __name__ == '__main__':
